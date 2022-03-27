@@ -1,8 +1,8 @@
 # Docker & PostgreSQL + PGAdmin4 + Adminer  
-Installation d'un environnement Environnement PostgreSQL avec PGAdmin et Adminer.  
+Installation d'un environnement PostgreSQL avec PGAdmin et Adminer.  
 
 ## Installation  
-1. Monter les conteneurs Docker (PostgreSQL, PGAdmin, Adminer) :  
+Monter les conteneurs Docker (PostgreSQL, PGAdmin, Adminer) :  
 `docker compose up`  
 
 ## Utilisation  
