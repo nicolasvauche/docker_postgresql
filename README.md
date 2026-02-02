@@ -35,8 +35,8 @@ Ce dépôt n’est pas lié à une application spécifique.
 - Docker installé sur la machine
 - Docker Compose v2
 - Ports disponibles sur la machine :
-    - PostgreSQL : 6432
-    - pgAdmin : 6062
+  - PostgreSQL : 6432
+  - pgAdmin : 6062
 
 ---
 
@@ -72,7 +72,8 @@ La variable POSTGRES_DB ne limite pas l’usage à une seule base.
 
 ## Démarrage
 
-Une fois le fichier .env renseigné, le serveur PostgreSQL et pgAdmin peuvent être démarrés via Docker Compose.
+Une fois le fichier .env renseigné, le serveur PostgreSQL et pgAdmin peuvent être démarrés via Docker Compose :
+`docker compose up -d`
 
 Après démarrage :
 
