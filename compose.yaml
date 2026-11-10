@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:${POSTGRES_VERSION:-16}-bookworm
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Lancez ./dev.ps1 init ou renseignez POSTGRES_PASSWORD dans .env}
+      # Fixed explicit path across major versions: incompatible data must fail,
+      # never silently initialize a new cluster after a version change.
+      PGDATA: /var/lib/postgresql/cluster
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256 --data-checksums
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./docker/init:/docker-entrypoint-initdb.d:ro
+    shm_size: 128mb
+    stop_grace_period: 60s
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -h 127.0.0.1 -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  postgres_data:

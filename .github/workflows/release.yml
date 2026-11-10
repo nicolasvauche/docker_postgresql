@@ -1,0 +1,77 @@
+name: Publish release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]*.[0-9]*.[0-9]*'
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: ${{ !github.event.deleted }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Check version tag and existing release
+        id: prepare
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          # The trigger uses glob syntax; validate a stable version explicitly.
+          if [[ ! "$RELEASE_TAG" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo "Ignoring non-stable version tag: $RELEASE_TAG"
+            exit 0
+          fi
+
+          # Preserve existing releases (including manual notes) on a rerun.
+          if gh release view "$RELEASE_TAG" --repo "$GH_REPO" >/dev/null 2>&1; then
+            echo "Release $RELEASE_TAG already exists; no changes made."
+            exit 0
+          fi
+
+          echo "publish=true" >> "$GITHUB_OUTPUT"
+
+      - name: Check out tagged source and full history
+        if: steps.prepare.outputs.publish == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Generate changelog for this release
+        if: steps.prepare.outputs.publish == 'true'
+        uses: orhun/git-cliff-action@a9a95522b26fe6403f7bb24031f21fb573d0f5ff # v4.9.1
+        with:
+          version: v2.14.2
+          config: cliff.toml
+          args: --current --output CHANGELOG.md
+
+      - name: Publish release with changelog notes and attachment
+        if: steps.prepare.outputs.publish == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          test -s CHANGELOG.md
+
+          gh release create "$RELEASE_TAG" CHANGELOG.md \
+            --repo "$GH_REPO" \
+            --verify-tag \
+            --title "$RELEASE_TAG" \
+            --notes-file CHANGELOG.md
