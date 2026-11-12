@@ -7,9 +7,13 @@ Aucune installation de PostgreSQL sur Windows n'est nécessaire.
 Cet environnement est autonome et utilisable avec tout client ou application
 compatible PostgreSQL, quel que soit son langage ou son framework.
 
-Cet environnement est réservé au développement local : le compte créé est un
-superutilisateur, les secrets sont dans `.env` et aucune configuration TLS ni
-stratégie de sauvegarde automatique n'est fournie pour la production.
+> [!WARNING]
+> **Cet environnement est réservé au développement local et à l'apprentissage. Ne l'utilisez pas tel quel en production.**
+> Le compte créé dispose des droits superutilisateur, le mot de passe est stocké
+> dans `.env`, et aucune configuration TLS ni sauvegarde automatique n'est prévue.
+> Un déploiement en production nécessite une configuration dédiée, notamment pour
+> limiter les droits d'accès, gérer les secrets, sécuriser les connexions et mettre
+> en place des sauvegardes dont la restauration est vérifiée.
 
 ## Prérequis
 
